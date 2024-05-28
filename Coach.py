@@ -4,10 +4,11 @@ from DataLoader import DataLoader
 
 class Coach:
 
-    def __init__(self, network, data_set):
+    def __init__(self, network, data_loader, varaible_learning_rate):
         self.network = network
-        self.data_loader = DataLoader()
-        self.train_data, self.train_labels, self.test_data, self.test_labels = self.data_loader.load_data_set(data_set)
+        self.data_loader = data_loader
+        self.train_data, self.train_labels, self.test_data, self.test_labels = self.data_loader.load_data()
+        self.varaible_learning_rate = varaible_learning_rate
 
     def calculate_cost(self):
         total_cost = 0
@@ -43,7 +44,7 @@ class Coach:
     def train(self, passes, samples_per_pass):
 
         cost = self.calculate_cost()
-        print(str(cost) + ' : ' + str(self.calculate_accuracy()) + '%')
+        print(str(cost) + ' : ' + str(self.calculate_accuracy()) + '%', flush=True)
 
         samples_left = [x for x in range(len(self.train_data))]
 
@@ -58,20 +59,26 @@ class Coach:
                 samples_left.pop(index)
                 self.network.backpropagation(self.train_data[sample_id], self.train_labels[sample_id])
 
-            self.network.apply_gradient(1)
-            new_cost = self.calculate_cost()
-            if new_cost < cost:
-                self.network.learning_rate = self.network.learning_rate * 1.05
+            if self.varaible_learning_rate:
+                self.network.apply_gradient(1)
+                new_cost = self.calculate_cost()
+                if new_cost < cost:
+                    self.network.learning_rate = self.network.learning_rate * 1.05
+                else:
+                    print("Decreasing learning rate", flush=True)
+                    while new_cost > cost:
+                        self.network.apply_gradient(-1)
+                        self.network.learning_rate = self.network.learning_rate * 0.8
+                        self.network.apply_gradient(1)
+                        new_cost = self.calculate_cost()
+                self.network.clear_gradient()
+                cost = new_cost
+                print(str(cost) + ' : ' + str(self.calculate_accuracy()) + '%' + ', epoch: ' + str(i+1), flush=True)
             else:
-                print("Decreasing learning rate")
-                while new_cost > cost:
-                    self.network.apply_gradient(-1)
-                    self.network.learning_rate = self.network.learning_rate * 0.8
-                    self.network.apply_gradient(1)
-                    new_cost = self.calculate_cost()
-            self.network.clear_gradient()
-            cost = new_cost
-            print(str(cost) + ' : ' + str(self.calculate_accuracy()) + '%')
+                self.network.apply_gradient(1)
+                self.network.clear_gradient()
+                cost = self.calculate_cost()
+                print(str(cost) + ' : ' + str(self.calculate_accuracy()) + '%' + ', epoch: ' + str(i+1), flush=True)
 
         self.network.save_to_file()
 

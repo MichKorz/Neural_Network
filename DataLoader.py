@@ -7,9 +7,14 @@ class DataLoader:
         self.test_labels_path = test_labels_path
 
     def check_data(self):
+        print("Checking data...", flush=True)
         train_data_length = 0
-        with open(self.train_data_path, 'r') as file:
-            train_data_length = len(file.readlines())
+        try:
+            with open(self.train_data_path, 'r') as file:
+                train_data_length = len(file.readlines())
+                print("File opened successfully", flush=True)
+        except FileNotFoundError:
+            print("File not found or cannot be opened", flush=True)
 
         train_labels_length = 0
         with open(self.train_labels_path, 'r') as file:
@@ -32,7 +37,7 @@ class DataLoader:
         data_valid = self.check_data()
 
         if not data_valid:
-            print("Data loading failed")
+            print("Data loading failed", flush=True)
             return None
 
         train_data = []
