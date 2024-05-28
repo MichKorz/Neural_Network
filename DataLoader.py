@@ -1,69 +1,67 @@
 class DataLoader:
 
-    def load_data_set(self, name):
-        if name == "Iris":
-            return self.load_iris()
-        elif name == "Mnist":
-            return self.load_mnist()
+    def __init__(self, train_data_path, train_labels_path, test_data_path, test_labels_path):
+        self.train_data_path = train_data_path
+        self.train_labels_path = train_labels_path
+        self.test_data_path = test_data_path
+        self.test_labels_path = test_labels_path
+
+    def check_data(self):
+        train_data_length = 0
+        with open(self.train_data_path, 'r') as file:
+            train_data_length = len(file.readlines())
+
+        train_labels_length = 0
+        with open(self.train_labels_path, 'r') as file:
+            train_labels_length = len(file.readlines())
+
+        test_data_length = 0
+        with open(self.test_data_path, 'r') as file:
+            test_data_length = len(file.readlines())
+
+        test_labels_length = 0
+        with open(self.test_labels_path, 'r') as file:
+            test_labels_length = len(file.readlines())
+
+        if (train_data_length != train_labels_length) or (test_data_length != test_labels_length):
+            return False
         else:
-            print('Data set: '+name+' not found')
+            return True
 
-    @staticmethod
-    def load_iris():
-        path = 'Iris/bezdekIris.data'
+    def load_data(self):
+        data_valid = self.check_data()
+
+        if not data_valid:
+            print("Data loading failed")
+            return None
 
         train_data = []
         train_labels = []
         test_data = []
         test_labels = []
 
-        with open(path, 'r') as file:
-            for i in range(3):
-                for j in range(40):
-                    line = file.readline().strip().split(',')
-                    inputs = [float(line[x]) for x in range(4)]
-                    answer = [1 if x == i else 0 for x in range(3)]
-                    train_data.append(inputs)
-                    train_labels.append(answer)
-
-                for k in range(10):
-                    line = file.readline().strip().split(',')
-                    inputs = [float(line[x]) for x in range(4)]
-                    answer = [1 if x == i else 0 for x in range(3)]
-                    test_data.append(inputs)
-                    test_labels.append(answer)
-
-        return train_data, train_labels, test_data, test_labels
-
-    @staticmethod
-    def load_mnist():
-        train_data = []
-        train_labels = []
-        test_data = []
-        test_labels = []
-
-        with open('MNIST/train_data.data', 'r') as file:
-            for line in file:
-                raw = line.strip().split(',')
-                inputs = [float(x) for x in raw]
+        with open(self.train_data_path, 'r') as file:
+            for raw in file:
+                line = raw.strip().split(',')
+                inputs = [float(line[i]) for i in range(len(line))]
                 train_data.append(inputs)
 
-        with open('MNIST/train_labels.data', 'r') as file:
-            for line in file:
-                raw = line.strip().split(',')
-                inputs = [float(x) for x in raw]
-                train_labels.append(inputs)
+        with open(self.train_labels_path, 'r') as file:
+            for raw in file:
+                line = raw.strip().split(',')
+                answers = [float(line[i]) for i in range(len(line))]
+                train_labels.append(answers)
 
-        with open('MNIST/test_data.data', 'r') as file:
-            for line in file:
-                raw = line.strip().split(',')
-                inputs = [float(x) for x in raw]
+        with open(self.test_data_path, 'r') as file:
+            for raw in file:
+                line = raw.strip().split(',')
+                inputs = [float(line[i]) for i in range(len(line))]
                 test_data.append(inputs)
 
-        with open('MNIST/test_labels.data', 'r') as file:
-            for line in file:
-                raw = line.strip().split(',')
-                inputs = [float(x) for x in raw]
-                test_labels.append(inputs)
+        with open(self.test_labels_path, 'r') as file:
+            for raw in file:
+                line = raw.strip().split(',')
+                answers = [float(line[i]) for i in range(len(line))]
+                test_labels.append(answers)
 
         return train_data, train_labels, test_data, test_labels
